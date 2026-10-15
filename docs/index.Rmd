@@ -6,7 +6,37 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+library(rvest)
+library(dplyr)
+library(tidyverse)
+library(janitor)
+library(ggplot2)
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## PART II
+
+# Scrape a Table (2.1)
+
+table_url <- "https://en.wikipedia.org/wiki/Community_areas_of_Chicago"
+
+table_page <- read_html(table_url)
+
+# COMMUNITY AREA AND TOTAL POPULATION
+wiki_tables <- table_page %>%
+  html_elements("table") %>%
+  html_table()
+
+population_table <- wiki_tables[[1]]
+
+
+# Scrape with CSS Selectors
+
+# ADD A FOURTH TABLE
+
+## Part III
+
+
+
 
 

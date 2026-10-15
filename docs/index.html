@@ -357,7 +357,29 @@ display: none;
 </div>
 
 
-
+<div id="part-ii" class="section level2">
+<h2>PART II</h2>
+</div>
+<div id="scrape-a-table-2.1" class="section level1">
+<h1>Scrape a Table (2.1)</h1>
+<p>table_url &lt;- “<a href="https://en.wikipedia.org/wiki/Community_areas_of_Chicago" class="uri">https://en.wikipedia.org/wiki/Community_areas_of_Chicago</a>”</p>
+<p>table_page &lt;- read_html(table_url)</p>
+</div>
+<div id="community-area-and-total-population" class="section level1">
+<h1>COMMUNITY AREA AND TOTAL POPULATION</h1>
+<p>wiki_tables &lt;- table_page %&gt;% html_elements(“table”) %&gt;%
+html_table()</p>
+<p>population_table &lt;- wiki_tables[[1]]</p>
+</div>
+<div id="scrape-with-css-selectors" class="section level1">
+<h1>Scrape with CSS Selectors</h1>
+</div>
+<div id="add-a-fourth-table" class="section level1">
+<h1>ADD A FOURTH TABLE</h1>
+<div id="part-iii" class="section level2">
+<h2>Part III</h2>
+</div>
+</div>
 
 
 
