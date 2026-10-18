@@ -11,6 +11,7 @@ library(dplyr)
 library(tidyverse)
 library(janitor)
 library(ggplot2)
+library(readr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -28,6 +29,18 @@ wiki_tables <- table_page %>%
   html_table()
 
 population_table <- wiki_tables[[1]]
+
+population_table <- population_table %>%
+  setNames(c("area_number", "community_area", "population", "area_sq_mi", "area_sq_km", "density_sq_mi", "density_sq_km")) %>%
+  slice(-1) %>%
+  filter(area_number != "Total") %>%
+  mutate(
+    area_number = as.integer(area_number),
+    population = parse_number(population)
+  )
+
+nrow(population_table)
+
 
 
 # Scrape with CSS Selectors
