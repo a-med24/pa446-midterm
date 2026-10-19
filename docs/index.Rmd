@@ -159,7 +159,16 @@ top_ten
 ### The most common requests in West Town are 311 Information Only Calls (305 calls) and Aircraft Noise Complaints (304 calls) which suggests that majority of residents likely seek information or concerns about about flight-path noise. What the data doesn't really tell us is if there are only a small amount of people calling multiple times about 311/Aircraft Noise or if it is a different person every time as the difference in calls is quite large with the third report only having 75 calls). 
 
 ## (3.5)
-# DO LATER IF YOU HAVE TIME
+# FINISH IF YOU HAVE TIME
+
+top_five <- west_town %>%
+  count(sr_type, sort = TRUE) %>%
+  head(5) %>%
+  pull(sr_type)
+  
+### close_days <- west_town %>%
+### filter(status == "Completed", sr_type %in% top_five)
+
 
 
 
