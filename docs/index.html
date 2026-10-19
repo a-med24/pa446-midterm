@@ -357,40 +357,39 @@ display: none;
 </div>
 
 
-<div id="part-ii" class="section level2">
-<h2>PART II</h2>
-</div>
-<div id="scrape-a-table" class="section level1">
-<h1>(2.1.1) Scrape a Table</h1>
+<div id="part-ii" class="section level1">
+<h1>PART II</h1>
+<div id="scrape-a-table" class="section level2">
+<h2>(2.1.1) Scrape a Table</h2>
 <p>table_url &lt;- “<a href="https://en.wikipedia.org/wiki/Community_areas_of_Chicago" class="uri">https://en.wikipedia.org/wiki/Community_areas_of_Chicago</a>”</p>
 <p>table_page &lt;- read_html(table_url)</p>
-</div>
-<div id="community-area-and-total-population" class="section level1">
-<h1>COMMUNITY AREA AND TOTAL POPULATION</h1>
+<div id="community-area-and-total-population" class="section level3">
+<h3>COMMUNITY AREA AND TOTAL POPULATION</h3>
 <p>wiki_tables &lt;- table_page %&gt;% html_elements(“table.wikitable”)
 %&gt;% html_table()</p>
 <p>population_table &lt;- wiki_tables[[2]]</p>
 </div>
-<div id="section" class="section level1">
-<h1>(2.1.2)</h1>
+</div>
+<div id="section" class="section level2">
+<h2>(2.1.2)</h2>
 <p>population_table &lt;- population_table %&gt;% clean_names() %&gt;%
 filter(name != “Chicago”) %&gt;% mutate(total_population =
 as.numeric(str_remove_all(total_population, “,”)))</p>
 </div>
-<div id="section-1" class="section level1">
-<h1>(2.1.3)</h1>
+<div id="section-1" class="section level2">
+<h2>(2.1.3)</h2>
 <p>population_table %&gt;% filter(name == “West Town”)</p>
 <p>population_table %&gt;% arrange(desc(total_population)) %&gt;%
 head(5)</p>
 <p>nrow(population_table) head(population_table)</p>
 </div>
-<div id="scrape-with-css-selectors" class="section level1">
-<h1>(2.2.1) Scrape with CSS Selectors</h1>
+<div id="scrape-with-css-selectors" class="section level2">
+<h2>(2.2.1) Scrape with CSS Selectors</h2>
 <p>css_url = “<a href="https://books.toscrape.com/" class="uri">https://books.toscrape.com/</a>” css_page =
 read_html(css_url)</p>
+<div id="title-price-availabiliity" class="section level3">
+<h3>Title, Price, Availabiliity</h3>
 </div>
-<div id="title-price-availabiliity" class="section level1">
-<h1>Title, Price, Availabiliity</h1>
 <div id="title-article.product_prod---h3---a---title" class="section level3">
 <h3>Title: article.product_prod -&gt; h3 -&gt; a -&gt; title</h3>
 </div>
@@ -412,13 +411,48 @@ html_element(“p.instock.availability”) %&gt;% html_text2()</p>
 <p>books &lt;- tibble( title, price, availability )</p>
 </div>
 </div>
-<div id="section-2" class="section level1">
-<h1>(2.2.2)</h1>
+<div id="section-2" class="section level2">
+<h2>(2.2.2)</h2>
+<p>books &lt;- books %&gt;% mutate(price =
+as.numeric(str_remove_all(price, “£”)))</p>
+<p>write_csv(books, “books.csv”)</p>
+<p>nrow(books) head(books)</p>
 </div>
-<div id="bonus" class="section level1">
-<h1>(2.2.BONUS)</h1>
-<div id="part-iii" class="section level2">
-<h2>Part III</h2>
+<div id="bonus" class="section level2">
+<h2>(2.2.BONUS)</h2>
+<div id="star-rating-of-stars-article.product_pod---p.star-rating.-of-stars" class="section level3">
+<h3>star-rating (# of stars): article.product_pod -&gt; p.star-rating.(#
+of stars)</h3>
+</div>
+<div id="grab-class-star-rating-of-stars" class="section level3">
+<h3>Grab class star-rating (# of stars)</h3>
+</div>
+<div id="remove-star-rating-to-leave-of-stars" class="section level3">
+<h3>Remove “star-rating” to leave # of stars</h3>
+<p>stars &lt;- books_table %&gt;% html_element(“p.star-rating”) %&gt;%
+html_attr(“class”) %&gt;% str_remove(“star-rating”)</p>
+<p>books &lt;- books %&gt;% mutate(rating = ifelse(stars == “One”, 1,
+ifelse(stars == “Two”, 2, ifelse(stars == “Three”, 3, ifelse(stars ==
+“Four”, 4, 5)))))</p>
+<p>write_csv(books, “books.csv”)</p>
+<p>nrow(books) head(books)</p>
+</div>
+</div>
+</div>
+<div id="part-iii" class="section level1">
+<h1>Part III</h1>
+<div id="section-3" class="section level2">
+<h2>(3.1)</h2>
+<p>open_url &lt;- “<a href="https://data.cityofchicago.org/resource/v6vf-nfxy.json" class="uri">https://data.cityofchicago.org/resource/v6vf-nfxy.json</a>”
+parameters &lt;- list( community_area = “24”, <code>$where</code> =
+“created_date &gt;= ‘2026-01-01T00:00:00’”, <code>$order</code> =
+“created_date DESC”, <code>$limit</code> = “1000” )</p>
+</div>
+<div id="section-4" class="section level2">
+<h2>(3.2)</h2>
+<p>data &lt;- GET(open_url, parameters)</p>
+<p>west_town &lt;- fromJSON(content(data, “text”), flatten = TRUE)
+nrow(west_town) names(west_town)</p>
 </div>
 </div>
 

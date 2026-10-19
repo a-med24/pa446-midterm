@@ -15,29 +15,29 @@ library(readr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## PART II
+# PART II
 
-# (2.1.1) Scrape a Table
+## (2.1.1) Scrape a Table
 
 table_url <- "https://en.wikipedia.org/wiki/Community_areas_of_Chicago"
 
 table_page <- read_html(table_url)
 
-# COMMUNITY AREA AND TOTAL POPULATION
+### COMMUNITY AREA AND TOTAL POPULATION
 wiki_tables <- table_page %>%
   html_elements("table.wikitable") %>%
   html_table()
 
 population_table <- wiki_tables[[2]]
 
-# (2.1.2)
+## (2.1.2)
 
 population_table <- population_table %>%
   clean_names() %>%
   filter(name != "Chicago") %>%
   mutate(total_population = as.numeric(str_remove_all(total_population, ",")))
   
-# (2.1.3)
+## (2.1.3)
 population_table %>%
   filter(name == "West Town")
   
@@ -51,7 +51,7 @@ head(population_table)
 
 
 
-# (2.2.1) Scrape with CSS Selectors
+## (2.2.1) Scrape with CSS Selectors
 
 css_url = "https://books.toscrape.com/"
 css_page = read_html(css_url)
@@ -83,7 +83,7 @@ books <- tibble(
   availability
 )
 
-# (2.2.2)
+## (2.2.2)
 
 books <- books %>%
   mutate(price = as.numeric(str_remove_all(price, "£")))
@@ -93,7 +93,7 @@ write_csv(books, "books.csv")
 nrow(books)
 head(books)
 
-# (2.2.BONUS)
+## (2.2.BONUS)
 
 ### star-rating (# of stars): article.product_pod -> p.star-rating.(# of stars)
 ### Grab class star-rating (# of stars) 
@@ -126,8 +126,25 @@ head(books)
 
 
 
+# Part III
 
-## Part III
+## (3.1)
+
+open_url <- "https://data.cityofchicago.org/resource/v6vf-nfxy.json"
+  parameters <- list(
+    community_area = "24",
+    `$where` = "created_date >= '2026-01-01T00:00:00'",
+    `$order` = "created_date DESC",
+    `$limit` = "1000"
+)
+
+## (3.2)
+
+data <- GET(open_url, parameters)
+
+west_town <- fromJSON(content(data, "text"), flatten = TRUE)
+nrow(west_town)
+names(west_town)
 
 
 
