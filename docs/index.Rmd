@@ -56,7 +56,7 @@ head(population_table)
 css_url = "https://books.toscrape.com/"
 css_page = read_html(css_url)
 
-# Title, Price, Availabiliity
+### Title, Price, Availabiliity
 
 ### Title: article.product_prod -> h3 -> a -> title
 ### Price: article.product_prod -> div.product_price -> p.price_color
@@ -85,7 +85,40 @@ books <- tibble(
 
 # (2.2.2)
 
+books <- books %>%
+  mutate(price = as.numeric(str_remove_all(price, "£")))
+  
+write_csv(books, "books.csv")
+
+nrow(books)
+head(books)
+
 # (2.2.BONUS)
+
+### star-rating (# of stars): article.product_pod -> p.star-rating.(# of stars)
+### Grab class star-rating (# of stars) 
+### Remove "star-rating " to leave # of stars
+
+stars <- books_table %>%
+  html_element("p.star-rating") %>%
+  html_attr("class") %>%
+  str_remove("star-rating ")
+  
+books <- books %>%
+  mutate(rating = 
+    ifelse(stars == "One", 1,
+    ifelse(stars == "Two", 2,
+    ifelse(stars == "Three", 3,
+    ifelse(stars == "Four", 4, 5)))))
+
+write_csv(books, "books.csv")
+
+nrow(books)
+head(books)
+    
+
+  
+
 
 
 
