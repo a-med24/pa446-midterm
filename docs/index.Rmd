@@ -126,9 +126,6 @@ head(books)
 
 
 
-
-
-
 # Part III
 
 ## (3.1)
@@ -163,6 +160,12 @@ top_ten
 
 ## (3.5)
 # DO LATER IF YOU HAVE TIME
+
+
+
+
+
+
 
 # PART IV
 
@@ -215,4 +218,49 @@ top5 <- ohio_wider %>%
 bottom5 <- ohio_wider %>%
   arrange(severe_burden_rate) %>%
   head(5)
+  
+## (4.5.1)
+ggplot(ohio_wider, aes(x = B19013_001, y = severe_burden_rate)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(
+    title = "Median Household Income vs Severely Rent Burdened Renters in Ohio (ACS 2024)",
+    x = "Median Household Income ($)",
+    y = "Severely Rent-Burdened Renters (%)"
+  )
 
+
+## (4.5.2)
+
+bar <- bind_rows(top5, bottom5)
+
+ggplot(bar, aes(x = reorder(county, severe_burden_rate), y = severe_burden_rate)) +
+  geom_col() + 
+  coord_flip() + 
+  labs(title = "Ohio Counties with Highest and Lowest Severe Rent Burden (ACS 2024)", 
+    x = "County", 
+    y = "Severely Rent-Burdened Renters (%)"
+  )
+  
+## (4.6.1)
+# There isn't really a strong correlation between income and severe rent burden in Ohio. The line does slope downward, so higher-income counties tend to have a lower severe rent burden. However, the points are very widely scattered so income alone does not likely explain much of the variation. I think rent burdening could apply more to specific neighborhoods or areas rather than household income. 
+
+## (4.6.2)
+# One limitation could probably be how populated the county is. After looking it up, Athens County and Portage County both have universities and college students are more likely have lower income yet pay some kind of rent whether that is through university housing or housing nearby campus. Another limitation could be the amount of places available to rent in different counties compared to just purchasing houses. 
+
+# PART V
+
+## (5.1)
+# Publishing exact addresses and coordinates of 311 requests could most definitely identify the people who made them. They had put a request for information, not to have them exposed. For example, with the aircraft noise complaints, having the address exposed could lead to some kind of retaliation if the complaints lead into some kind of trouble. I would likely use aggregation in order to void the street address and exact coordinates entirely. I would likely just leave it as the neighborhood. I would also suppress the number of requests that is shown if it shows to be too small. I would likely not disclose the number of requests if they are less than ~5. 
+
+## (5.2)
+# Some people are unable to access technology, do not speak the language that 311 may host with, and/or are just unaware of the 311 system. This would lead to many requests not being put in and the only requests that are being noticed are biased toward English Speakers who are able to access technology easier. A city manager would likely see plenty of requests for one area in a primarily English Speaking town and would first go there but would not check other areas that are not the majority. One way to reduce the bias is to add more accessibility / translation options with 311. 
+
+## (5.3)
+# I believe the scraping that I did in Part II was appropriate. The Wikipedia table is public and contains no personal information. Following its reference link, it led me to the "Chicago Metropolitan Agency for Planning". The website is a government website with the data public as well. I did nothing that would be out of the ordinary for this information to be used nor would it violate any citizen's privacy. For the CSS portion, "Books to Scrape" is a site built for scraping practice so that also has no ethical concerns either. A situation that would require further review would be with a dataset that holds more private information like addresses, names, or other personal identifiers. This would likely be anything related to court, eviction, and other records. 
+
+
+
+### AI USAGE
+
+# Used it a few times primarily for syntax/grammar errors. I could not figure out what was wrong and realized it was someting as simple as "estimmate" and I made sure my wording made sense for explanations considering at the moment of doing the assignment I had put a concerning amount of typos that I would not have caught. I also checked my scatterplot code to make sure it was right because the plot itself did not look quite right and I was concerned.
