@@ -6,25 +6,130 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+library(rvest)
+library(dplyr)
+library(tidyverse)
+library(janitor)
+library(ggplot2)
+library(readr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## PART II
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# (2.1.1) Scrape a Table
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+table_url <- "https://en.wikipedia.org/wiki/Community_areas_of_Chicago"
 
-```{r cars}
-summary(cars)
-```
+table_page <- read_html(table_url)
 
-## Including Plots
+# COMMUNITY AREA AND TOTAL POPULATION
+wiki_tables <- table_page %>%
+  html_elements("table.wikitable") %>%
+  html_table()
 
-You can also embed plots, for example:
+population_table <- wiki_tables[[2]]
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+# (2.1.2)
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+population_table <- population_table %>%
+  clean_names() %>%
+  filter(name != "Chicago") %>%
+  mutate(total_population = as.numeric(str_remove_all(total_population, ",")))
+  
+# (2.1.3)
+population_table %>%
+  filter(name == "West Town")
+  
+population_table %>%
+  arrange(desc(total_population)) %>%
+  head(5)
+
+nrow(population_table)
+head(population_table)
+
+
+
+
+# (2.2.1) Scrape with CSS Selectors
+
+css_url = "https://books.toscrape.com/"
+css_page = read_html(css_url)
+
+### Title, Price, Availabiliity
+
+### Title: article.product_prod -> h3 -> a -> title
+### Price: article.product_prod -> div.product_price -> p.price_color
+### Availability: article.product_prod -> div.product_price -> p.instock.availability
+
+books_table <- css_page %>%
+  html_elements("article.product_pod")
+  
+title <- books_table %>%
+  html_element("h3 a") %>%
+  html_attr("title")
+  
+price <- books_table %>%
+  html_element("p.price_color") %>%
+  html_text2()
+
+availability <- books_table %>%
+  html_element("p.instock.availability") %>%
+  html_text2()
+
+books <- tibble(
+  title,
+  price,
+  availability
+)
+
+# (2.2.2)
+
+books <- books %>%
+  mutate(price = as.numeric(str_remove_all(price, "£")))
+  
+write_csv(books, "books.csv")
+
+nrow(books)
+head(books)
+
+# (2.2.BONUS)
+
+### star-rating (# of stars): article.product_pod -> p.star-rating.(# of stars)
+### Grab class star-rating (# of stars) 
+### Remove "star-rating " to leave # of stars
+
+stars <- books_table %>%
+  html_element("p.star-rating") %>%
+  html_attr("class") %>%
+  str_remove("star-rating ")
+  
+books <- books %>%
+  mutate(rating = 
+    ifelse(stars == "One", 1,
+    ifelse(stars == "Two", 2,
+    ifelse(stars == "Three", 3,
+    ifelse(stars == "Four", 4, 5)))))
+
+write_csv(books, "books.csv")
+
+nrow(books)
+head(books)
+    
+
+  
+
+
+
+
+
+
+
+
+
+## Part III
+
+
+
+
+
