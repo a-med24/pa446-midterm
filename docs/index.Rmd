@@ -1,8 +1,10 @@
 ---
 title: "index"
 author: "Alex Medina"
-date: "2026-10-14"
-output: html_document
+date: "2026-10-18"
+output: 
+  html_document:
+    theme: united
 ---
 
 ```{r setup, include=FALSE}
