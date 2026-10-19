@@ -9,9 +9,12 @@ output: html_document
 library(rvest)
 library(dplyr)
 library(tidyverse)
+library(tidycensus)
 library(janitor)
 library(ggplot2)
 library(readr)
+library(jsonlite)
+library(httr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -146,7 +149,20 @@ west_town <- fromJSON(content(data, "text"), flatten = TRUE)
 nrow(west_town)
 names(west_town)
 
+## (3.3)
 
+top_ten <- west_town %>%
+  count(sr_type, sort = TRUE) %>%
+  head(10)
 
+top_ten
 
+## (3.4)
+
+### The most common requests in West Town are 311 Information Only Calls (305 calls) and Aircraft Noise Complaints (304 calls) which suggests that majority of residents likely seek information or concerns about about flight-path noise. What the data doesn't really tell us is if there are only a small amount of people calling multiple times about 311/Aircraft Noise or if it is a different person every time as the difference in calls is quite large with the third report only having 75 calls). 
+
+## (3.5)
+# DO LATER IF YOU HAVE TIME
+
+# PART IV
 
