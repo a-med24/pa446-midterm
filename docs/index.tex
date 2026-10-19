@@ -1,0 +1,364 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={index},
+  pdfauthor={Alex Medina},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{index}
+\author{Alex Medina}
+\date{2026-10-18}
+
+\begin{document}
+\maketitle
+
+\section{PART II}\label{part-ii}
+
+\subsection{(2.1.1) Scrape a Table}\label{scrape-a-table}
+
+table\_url \textless-
+``\url{https://en.wikipedia.org/wiki/Community_areas_of_Chicago}''
+
+table\_page \textless- read\_html(table\_url)
+
+\subsubsection{COMMUNITY AREA AND TOTAL
+POPULATION}\label{community-area-and-total-population}
+
+wiki\_tables \textless- table\_page \%\textgreater\%
+html\_elements(``table.wikitable'') \%\textgreater\% html\_table()
+
+population\_table \textless- wiki\_tables{[}{[}2{]}{]}
+
+\subsection{(2.1.2)}\label{section}
+
+population\_table \textless- population\_table \%\textgreater\%
+clean\_names() \%\textgreater\% filter(name != ``Chicago'')
+\%\textgreater\% mutate(total\_population =
+as.numeric(str\_remove\_all(total\_population, ``,'')))
+
+\subsection{(2.1.3)}\label{section-1}
+
+population\_table \%\textgreater\% filter(name == ``West Town'')
+
+population\_table \%\textgreater\% arrange(desc(total\_population))
+\%\textgreater\% head(5)
+
+nrow(population\_table) head(population\_table)
+
+\subsection{(2.2.1) Scrape with CSS
+Selectors}\label{scrape-with-css-selectors}
+
+css\_url = ``\url{https://books.toscrape.com/}'' css\_page =
+read\_html(css\_url)
+
+\subsubsection{Title, Price,
+Availabiliity}\label{title-price-availabiliity}
+
+\subsubsection{Title: article.product\_prod -\textgreater{} h3
+-\textgreater{} a -\textgreater{}
+title}\label{title-article.product_prod---h3---a---title}
+
+\subsubsection{Price: article.product\_prod -\textgreater{}
+div.product\_price -\textgreater{}
+p.price\_color}\label{price-article.product_prod---div.product_price---p.price_color}
+
+\subsubsection{Availability: article.product\_prod -\textgreater{}
+div.product\_price -\textgreater{}
+p.instock.availability}\label{availability-article.product_prod---div.product_price---p.instock.availability}
+
+books\_table \textless- css\_page \%\textgreater\%
+html\_elements(``article.product\_pod'')
+
+title \textless- books\_table \%\textgreater\% html\_element(``h3 a'')
+\%\textgreater\% html\_attr(``title'')
+
+price \textless- books\_table \%\textgreater\%
+html\_element(``p.price\_color'') \%\textgreater\% html\_text2()
+
+availability \textless- books\_table \%\textgreater\%
+html\_element(``p.instock.availability'') \%\textgreater\% html\_text2()
+
+books \textless- tibble( title, price, availability )
+
+\subsection{(2.2.2)}\label{section-2}
+
+books \textless- books \%\textgreater\% mutate(price =
+as.numeric(str\_remove\_all(price, ``£'')))
+
+write\_csv(books, ``books.csv'')
+
+nrow(books) head(books)
+
+\subsection{(2.2.BONUS)}\label{bonus}
+
+\subsubsection{star-rating (\# of stars): article.product\_pod
+-\textgreater{} p.star-rating.(\# of
+stars)}\label{star-rating-of-stars-article.product_pod---p.star-rating.-of-stars}
+
+\subsubsection{Grab class star-rating (\# of
+stars)}\label{grab-class-star-rating-of-stars}
+
+\subsubsection{Remove ``star-rating'' to leave \# of
+stars}\label{remove-star-rating-to-leave-of-stars}
+
+stars \textless- books\_table \%\textgreater\%
+html\_element(``p.star-rating'') \%\textgreater\% html\_attr(``class'')
+\%\textgreater\% str\_remove(``star-rating'')
+
+books \textless- books \%\textgreater\% mutate(rating = ifelse(stars ==
+``One'', 1, ifelse(stars == ``Two'', 2, ifelse(stars == ``Three'', 3,
+ifelse(stars == ``Four'', 4, 5)))))
+
+write\_csv(books, ``books.csv'')
+
+nrow(books) head(books)
+
+\section{Part III}\label{part-iii}
+
+\subsection{(3.1)}\label{section-3}
+
+open\_url \textless-
+``\url{https://data.cityofchicago.org/resource/v6vf-nfxy.json}''
+parameters \textless- list( community\_area = ``24'', \texttt{\$where} =
+``created\_date \textgreater= `2026-01-01T00:00:00'\,'',
+\texttt{\$order} = ``created\_date DESC'', \texttt{\$limit} = ``1000'' )
+
+\subsection{(3.2)}\label{section-4}
+
+data \textless- GET(open\_url, parameters)
+
+west\_town \textless- fromJSON(content(data, ``text''), flatten = TRUE)
+nrow(west\_town) names(west\_town)
+
+\subsection{(3.3)}\label{section-5}
+
+top\_ten \textless- west\_town \%\textgreater\% count(sr\_type, sort =
+TRUE) \%\textgreater\% head(10)
+
+top\_ten
+
+\subsection{(3.4)}\label{section-6}
+
+\subsubsection{The most common requests in West Town are 311 Information
+Only Calls (305 calls) and Aircraft Noise Complaints (304 calls) which
+suggests that majority of residents likely seek information or concerns
+about about flight-path noise. What the data doesn't really tell us is
+if there are only a small amount of people calling multiple times about
+311/Aircraft Noise or if it is a different person every time as the
+difference in calls is quite large with the third report only having 75
+calls).}\label{the-most-common-requests-in-west-town-are-311-information-only-calls-305-calls-and-aircraft-noise-complaints-304-calls-which-suggests-that-majority-of-residents-likely-seek-information-or-concerns-about-about-flight-path-noise.-what-the-data-doesnt-really-tell-us-is-if-there-are-only-a-small-amount-of-people-calling-multiple-times-about-311aircraft-noise-or-if-it-is-a-different-person-every-time-as-the-difference-in-calls-is-quite-large-with-the-third-report-only-having-75-calls.}
+
+\subsection{(3.5)}\label{section-7}
+
+\section{FINISH IF YOU HAVE TIME}\label{finish-if-you-have-time}
+
+top\_five \textless- west\_town \%\textgreater\% count(sr\_type, sort =
+TRUE) \%\textgreater\% head(5) \%\textgreater\% pull(sr\_type)
+
+\subsubsection{close\_days \textless- west\_town
+\%\textgreater\%}\label{close_days---west_town}
+
+\subsubsection{filter(status == ``Completed'', sr\_type \%in\%
+top\_five)}\label{filterstatus-completed-sr_type-in-top_five}
+
+\section{PART IV}\label{part-iv}
+
+\subsection{(4.1)}\label{section-8}
+
+\subsubsection{Gross Rent as a Percentage of Household Income,
+``Total'':
+B25070\_001E}\label{gross-rent-as-a-percentage-of-household-income-total-b25070_001e}
+
+\subsubsection{• Gross Rent as a Percentage of Household Income, ``50.0
+percent or more'': \_\_\_\_\_\_\_\_
+B25070\_010E}\label{gross-rent-as-a-percentage-of-household-income-50.0-percent-or-more-________-b25070_010e}
+
+\subsubsection{• Median Household Income: \_\_\_\_\_\_\_\_
+B19013\_001E}\label{median-household-income-________-b19013_001e}
+
+\subsection{(4.2)}\label{section-9}
+
+ohio \textless- get\_acs( geography = ``county'', variables = c( Total =
+``B25070\_001E'', Rent\_50 = ``B25070\_010E'', median\_income =
+``B19013\_001E'' ), state = ``OH'', year = 2024, survey = ``acs5'' )
+
+\subsection{(4.3)}\label{section-10}
+
+ohio\_wider \textless- ohio \%\textgreater\% select(GEOID, NAME,
+variable, estimate) \%\textgreater\% pivot\_wider(names\_from =
+variable, values\_from = estimate)
+
+ohio\_wider \textless- ohio\_wider \%\textgreater\%
+mutate(severe\_burden\_rate = B25070\_010 / B25070\_001 * 100)
+\%\textgreater\% arrange(desc(severe\_burden\_rate))
+
+\subsection{(4.BONUS)}\label{bonus-1}
+
+ohio\_wider \textless- ohio\_wider \%\textgreater\% separate(NAME, into
+= c(``county'', ``state''), ``,'')
+
+\subsection{(4.4)}\label{section-11}
+
+ohio\_wider \%\textgreater\% summarize( mean\_rate =
+mean(severe\_burden\_rate), median\_rate = median(severe\_burden\_rate)
+)
+
+top5 \textless- ohio\_wider \%\textgreater\%
+arrange(desc(severe\_burden\_rate)) \%\textgreater\% head(5)
+
+bottom5 \textless- ohio\_wider \%\textgreater\%
+arrange(severe\_burden\_rate) \%\textgreater\% head(5)
+
+\subsection{(4.5.1)}\label{section-12}
+
+ggplot(ohio\_wider, aes(x = B19013\_001, y = severe\_burden\_rate)) +
+geom\_point() + geom\_smooth(method = ``lm'') + labs( title = ``Median
+Household Income vs Severely Rent Burdened Renters in Ohio (ACS 2024)'',
+x = ``Median Household Income (\$)'', y = ``Severely Rent-Burdened
+Renters (\%)'' )
+
+\subsection{(4.5.2)}\label{section-13}
+
+bar \textless- bind\_rows(top5, bottom5)
+
+ggplot(bar, aes(x = reorder(county, severe\_burden\_rate), y =
+severe\_burden\_rate)) + geom\_col() + coord\_flip() + labs(title =
+``Ohio Counties with Highest and Lowest Severe Rent Burden (ACS 2024)'',
+x = ``County'', y = ``Severely Rent-Burdened Renters (\%)'' )
+
+\subsection{(4.6.1)}\label{section-14}
+
+\section{There isn't really a strong correlation between income and
+severe rent burden in Ohio. The line does slope downward, so
+higher-income counties tend to have a lower severe rent burden. However,
+the points are very widely scattered so income alone does not likely
+explain much of the variation. I think rent burdening could apply more
+to specific neighborhoods or areas rather than household
+income.}\label{there-isnt-really-a-strong-correlation-between-income-and-severe-rent-burden-in-ohio.-the-line-does-slope-downward-so-higher-income-counties-tend-to-have-a-lower-severe-rent-burden.-however-the-points-are-very-widely-scattered-so-income-alone-does-not-likely-explain-much-of-the-variation.-i-think-rent-burdening-could-apply-more-to-specific-neighborhoods-or-areas-rather-than-household-income.}
+
+\subsection{(4.6.2)}\label{section-15}
+
+\section{One limitation could probably be how populated the county is.
+After looking it up, Athens County and Portage County both have
+universities and college students are more likely have lower income yet
+pay some kind of rent whether that is through university housing or
+housing nearby campus. Another limitation could be the amount of places
+available to rent in different counties compared to just purchasing
+houses.}\label{one-limitation-could-probably-be-how-populated-the-county-is.-after-looking-it-up-athens-county-and-portage-county-both-have-universities-and-college-students-are-more-likely-have-lower-income-yet-pay-some-kind-of-rent-whether-that-is-through-university-housing-or-housing-nearby-campus.-another-limitation-could-be-the-amount-of-places-available-to-rent-in-different-counties-compared-to-just-purchasing-houses.}
+
+\section{PART V}\label{part-v}
+
+\subsection{(5.1)}\label{section-16}
+
+\section{Publishing exact addresses and coordinates of 311 requests
+could most definitely identify the people who made them. They had put a
+request for information, not to have them exposed. For example, with the
+aircraft noise complaints, having the address exposed could lead to some
+kind of retaliation if the complaints lead into some kind of trouble. I
+would likely use aggregation in order to void the street address and
+exact coordinates entirely. I would likely just leave it as the
+neighborhood. I would also suppress the number of requests that is shown
+if it shows to be too small. I would likely not disclose the number of
+requests if they are less than
+\textasciitilde5.}\label{publishing-exact-addresses-and-coordinates-of-311-requests-could-most-definitely-identify-the-people-who-made-them.-they-had-put-a-request-for-information-not-to-have-them-exposed.-for-example-with-the-aircraft-noise-complaints-having-the-address-exposed-could-lead-to-some-kind-of-retaliation-if-the-complaints-lead-into-some-kind-of-trouble.-i-would-likely-use-aggregation-in-order-to-void-the-street-address-and-exact-coordinates-entirely.-i-would-likely-just-leave-it-as-the-neighborhood.-i-would-also-suppress-the-number-of-requests-that-is-shown-if-it-shows-to-be-too-small.-i-would-likely-not-disclose-the-number-of-requests-if-they-are-less-than-5.}
+
+\subsection{(5.2)}\label{section-17}
+
+\section{Some people are unable to access technology, do not speak the
+language that 311 may host with, and/or are just unaware of the 311
+system. This would lead to many requests not being put in and the only
+requests that are being noticed are biased toward English Speakers who
+are able to access technology easier. A city manager would likely see
+plenty of requests for one area in a primarily English Speaking town and
+would first go there but would not check other areas that are not the
+majority. One way to reduce the bias is to add more accessibility /
+translation options with
+311.}\label{some-people-are-unable-to-access-technology-do-not-speak-the-language-that-311-may-host-with-andor-are-just-unaware-of-the-311-system.-this-would-lead-to-many-requests-not-being-put-in-and-the-only-requests-that-are-being-noticed-are-biased-toward-english-speakers-who-are-able-to-access-technology-easier.-a-city-manager-would-likely-see-plenty-of-requests-for-one-area-in-a-primarily-english-speaking-town-and-would-first-go-there-but-would-not-check-other-areas-that-are-not-the-majority.-one-way-to-reduce-the-bias-is-to-add-more-accessibility-translation-options-with-311.}
+
+\subsection{(5.3)}\label{section-18}
+
+\section{I believe the scraping that I did in Part II was appropriate.
+The Wikipedia table is public and contains no personal information.
+Following its reference link, it led me to the ``Chicago Metropolitan
+Agency for Planning''. The website is a government website with the data
+public as well. I did nothing that would be out of the ordinary for this
+information to be used nor would it violate any citizen's privacy. For
+the CSS portion, ``Books to Scrape'' is a site built for scraping
+practice so that also has no ethical concerns either. A situation that
+would require further review would be with a dataset that holds more
+private information like addresses, names, or other personal
+identifiers. This would likely be anything related to court, eviction,
+and other
+records.}\label{i-believe-the-scraping-that-i-did-in-part-ii-was-appropriate.-the-wikipedia-table-is-public-and-contains-no-personal-information.-following-its-reference-link-it-led-me-to-the-chicago-metropolitan-agency-for-planning.-the-website-is-a-government-website-with-the-data-public-as-well.-i-did-nothing-that-would-be-out-of-the-ordinary-for-this-information-to-be-used-nor-would-it-violate-any-citizens-privacy.-for-the-css-portion-books-to-scrape-is-a-site-built-for-scraping-practice-so-that-also-has-no-ethical-concerns-either.-a-situation-that-would-require-further-review-would-be-with-a-dataset-that-holds-more-private-information-like-addresses-names-or-other-personal-identifiers.-this-would-likely-be-anything-related-to-court-eviction-and-other-records.}
+
+\subsubsection{AI USAGE}\label{ai-usage}
+
+\section{Used it a few times primarily for syntax/grammar errors. I
+could not figure out what was wrong and realized it was someting as
+simple as ``estimmate'' and I made sure my wording made sense for
+explanations considering at the moment of doing the assignment I had put
+a concerning amount of typos that I would not have caught. I also
+checked my scatterplot code to make sure it was right because the plot
+itself did not look quite right and I was
+concerned.}\label{used-it-a-few-times-primarily-for-syntaxgrammar-errors.-i-could-not-figure-out-what-was-wrong-and-realized-it-was-someting-as-simple-as-estimmate-and-i-made-sure-my-wording-made-sense-for-explanations-considering-at-the-moment-of-doing-the-assignment-i-had-put-a-concerning-amount-of-typos-that-i-would-not-have-caught.-i-also-checked-my-scatterplot-code-to-make-sure-it-was-right-because-the-plot-itself-did-not-look-quite-right-and-i-was-concerned.}
+
+\end{document}

@@ -2,7 +2,7 @@
 title: "index"
 author: "Alex Medina"
 date: "2026-10-18"
-output: 
+output:
   html_document:
     theme: united
 ---
@@ -17,63 +17,72 @@ library(ggplot2)
 library(readr)
 library(jsonlite)
 library(httr)
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
 # PART II
 
 ## (2.1.1) Scrape a Table
 
+```{r}
 table_url <- "https://en.wikipedia.org/wiki/Community_areas_of_Chicago"
 
 table_page <- read_html(table_url)
 
-### COMMUNITY AREA AND TOTAL POPULATION
+# COMMUNITY AREA AND TOTAL POPULATION
 wiki_tables <- table_page %>%
   html_elements("table.wikitable") %>%
   html_table()
 
 population_table <- wiki_tables[[2]]
 
+nrow(population_table)
+head(population_table)
+```
+
 ## (2.1.2)
 
+```{r}
 population_table <- population_table %>%
   clean_names() %>%
   filter(name != "Chicago") %>%
   mutate(total_population = as.numeric(str_remove_all(total_population, ",")))
-  
+
+nrow(population_table)
+head(population_table)
+```
+
 ## (2.1.3)
+
+```{r}
 population_table %>%
   filter(name == "West Town")
-  
+
 population_table %>%
   arrange(desc(total_population)) %>%
   head(5)
 
-nrow(population_table)
-head(population_table)
-
-
-
+population_table
+```
 
 ## (2.2.1) Scrape with CSS Selectors
 
+```{r}
 css_url = "https://books.toscrape.com/"
 css_page = read_html(css_url)
 
-### Title, Price, Availabiliity
-
-### Title: article.product_prod -> h3 -> a -> title
-### Price: article.product_prod -> div.product_price -> p.price_color
-### Availability: article.product_prod -> div.product_price -> p.instock.availability
+# Title, Price, Availability
+# Title: article.product_pod -> h3 -> a -> title
+# Price: article.product_pod -> div.product_price -> p.price_color
+# Availability: article.product_pod -> div.product_price -> p.instock.availability
 
 books_table <- css_page %>%
   html_elements("article.product_pod")
-  
+
 title <- books_table %>%
   html_element("h3 a") %>%
   html_attr("title")
-  
+
 price <- books_table %>%
   html_element("p.price_color") %>%
   html_text2()
@@ -88,29 +97,37 @@ books <- tibble(
   availability
 )
 
+nrow(books)
+head(books)
+```
+
 ## (2.2.2)
 
+```{r}
 books <- books %>%
-  mutate(price = as.numeric(str_remove_all(price, "£")))
-  
+  mutate(price = as.numeric(str_remove_all(price, "[^0-9.]")))
+
 write_csv(books, "books.csv")
 
 nrow(books)
 head(books)
+books
+```
 
 ## (2.2.BONUS)
 
-### star-rating (# of stars): article.product_pod -> p.star-rating.(# of stars)
-### Grab class star-rating (# of stars) 
-### Remove "star-rating " to leave # of stars
+```{r}
+# star-rating (# of stars): article.product_pod -> p.star-rating.(# of stars)
+# Grab class "star-rating (# of stars)"
+# Remove "star-rating " to leave # of stars
 
 stars <- books_table %>%
   html_element("p.star-rating") %>%
   html_attr("class") %>%
   str_remove("star-rating ")
-  
+
 books <- books %>%
-  mutate(rating = 
+  mutate(rating =
     ifelse(stars == "One", 1,
     ifelse(stars == "Two", 2,
     ifelse(stars == "Three", 3,
@@ -120,73 +137,72 @@ write_csv(books, "books.csv")
 
 nrow(books)
 head(books)
-    
+books
+```
 
-  
-
-
-
-
-
-# Part III
+# PART III
 
 ## (3.1)
 
+```{r}
 open_url <- "https://data.cityofchicago.org/resource/v6vf-nfxy.json"
-  parameters <- list(
-    community_area = "24",
-    `$where` = "created_date >= '2026-01-01T00:00:00'",
-    `$order` = "created_date DESC",
-    `$limit` = "1000"
+
+parameters <- list(
+  community_area = "24",
+  `$where` = "created_date >= '2026-01-01T00:00:00'",
+  `$order` = "created_date DESC",
+  `$limit` = "1000"
 )
+
+data <- GET(open_url, parameters)
+```
 
 ## (3.2)
 
-data <- GET(open_url, parameters)
-
+```{r}
 west_town <- fromJSON(content(data, "text"), flatten = TRUE)
+
 nrow(west_town)
 names(west_town)
+```
 
 ## (3.3)
 
+```{r}
 top_ten <- west_town %>%
   count(sr_type, sort = TRUE) %>%
   head(10)
 
 top_ten
+```
 
 ## (3.4)
 
-### The most common requests in West Town are 311 Information Only Calls (305 calls) and Aircraft Noise Complaints (304 calls) which suggests that majority of residents likely seek information or concerns about about flight-path noise. What the data doesn't really tell us is if there are only a small amount of people calling multiple times about 311/Aircraft Noise or if it is a different person every time as the difference in calls is quite large with the third report only having 75 calls). 
+The most common requests in West Town are 311 Information Only Calls (305 calls) and Aircraft Noise Complaints (304 calls) which suggests that majority of residents likely seek information or concerns about about flight-path noise. What the data doesn't really tell us is if there are only a small amount of people calling multiple times about 311/Aircraft Noise or if it is a different person every time as the difference in calls is quite large with the third report only having 75 calls).
 
-## (3.5)
-# FINISH IF YOU HAVE TIME
+## (3.5) BONUS
+### FINISH IF YOU HAVE TIME
 
+```{r}
 top_five <- west_town %>%
   count(sr_type, sort = TRUE) %>%
   head(5) %>%
   pull(sr_type)
-  
-### close_days <- west_town %>%
-### filter(status == "Completed", sr_type %in% top_five)
 
 
-
-
-
-
-
+```
 
 # PART IV
 
 ## (4.1)
-### Gross Rent as a Percentage of Household Income, “Total”: B25070_001E
-### • Gross Rent as a Percentage of Household Income, "50.0 percent or more": ________ B25070_010E
-### • Median Household Income: ________ B19013_001E
+
+- Gross Rent as a Percentage of Household Income, "Total": **B25070_001E**
+- Gross Rent as a Percentage of Household Income, "50.0 percent or more": **B25070_010E**
+- Median Household Income: **B19013_001E**
 
 ## (4.2)
 
+```{r}
 ohio <- get_acs(
   geography = "county",
   variables = c(
@@ -199,23 +215,35 @@ ohio <- get_acs(
   survey = "acs5"
 )
 
+head(ohio)
+```
+
 ## (4.3)
 
+```{r}
 ohio_wider <- ohio %>%
   select(GEOID, NAME, variable, estimate) %>%
   pivot_wider(names_from = variable, values_from = estimate)
 
 ohio_wider <- ohio_wider %>%
-  mutate(severe_burden_rate = B25070_010 / B25070_001 * 100) %>% 
+  mutate(severe_burden_rate = B25070_010 / B25070_001 * 100) %>%
   arrange(desc(severe_burden_rate))
-  
+
+head(ohio_wider)
+```
+
 ## (4.BONUS)
 
+```{r}
 ohio_wider <- ohio_wider %>%
   separate(NAME, into = c("county", "state"), ", ")
 
+head(ohio_wider)
+```
+
 ## (4.4)
 
+```{r}
 ohio_wider %>%
   summarize(
     mean_rate = mean(severe_burden_rate),
@@ -225,53 +253,63 @@ ohio_wider %>%
 top5 <- ohio_wider %>%
   arrange(desc(severe_burden_rate)) %>%
   head(5)
-  
+
 bottom5 <- ohio_wider %>%
   arrange(severe_burden_rate) %>%
   head(5)
-  
+
+```
+
 ## (4.5.1)
+
+```{r}
 ggplot(ohio_wider, aes(x = B19013_001, y = severe_burden_rate)) +
-  geom_point() + 
+  geom_point() +
   geom_smooth(method = "lm") +
   labs(
-    title = "Median Household Income vs Severely Rent Burdened Renters in Ohio (ACS 2024)",
+    title = "Median Household Income vs Severely Rent Burdened Renters Ohio Counties (ACS 2024)",
     x = "Median Household Income ($)",
     y = "Severely Rent-Burdened Renters (%)"
   )
-
+```
 
 ## (4.5.2)
 
+```{r}
 bar <- bind_rows(top5, bottom5)
 
 ggplot(bar, aes(x = reorder(county, severe_burden_rate), y = severe_burden_rate)) +
-  geom_col() + 
-  coord_flip() + 
-  labs(title = "Ohio Counties with Highest and Lowest Severe Rent Burden (ACS 2024)", 
-    x = "County", 
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Ohio Counties with Highest and Lowest Severe Rent Burden (ACS 2024)",
+    x = "County",
     y = "Severely Rent-Burdened Renters (%)"
   )
-  
+```
+
 ## (4.6.1)
-# There isn't really a strong correlation between income and severe rent burden in Ohio. The line does slope downward, so higher-income counties tend to have a lower severe rent burden. However, the points are very widely scattered so income alone does not likely explain much of the variation. I think rent burdening could apply more to specific neighborhoods or areas rather than household income. 
+
+There isn't really a strong correlation between income and severe rent burden in Ohio. The line does slope downward, so higher-income counties tend to have a lower severe rent burden. However, the points are very widely scattered so income alone does not likely explain much of the variation. I think rent burdening could apply more to specific neighborhoods or areas rather than household income.
 
 ## (4.6.2)
-# One limitation could probably be how populated the county is. After looking it up, Athens County and Portage County both have universities and college students are more likely have lower income yet pay some kind of rent whether that is through university housing or housing nearby campus. Another limitation could be the amount of places available to rent in different counties compared to just purchasing houses. 
+
+One limitation could probably be how populated the county is. After looking it up, Athens County and Portage County both have universities and college students are more likely have lower income yet pay some kind of rent whether that is through university housing or housing nearby campus. Another limitation could be the amount of places available to rent in different counties compared to just purchasing houses.
 
 # PART V
 
 ## (5.1)
-# Publishing exact addresses and coordinates of 311 requests could most definitely identify the people who made them. They had put a request for information, not to have them exposed. For example, with the aircraft noise complaints, having the address exposed could lead to some kind of retaliation if the complaints lead into some kind of trouble. I would likely use aggregation in order to void the street address and exact coordinates entirely. I would likely just leave it as the neighborhood. I would also suppress the number of requests that is shown if it shows to be too small. I would likely not disclose the number of requests if they are less than ~5. 
+
+Publishing exact addresses and coordinates of 311 requests could most definitely identify the people who made them. They had put a request for information, not to have them exposed. For example, with the aircraft noise complaints, having the address exposed could lead to some kind of retaliation if the complaints lead into some kind of trouble. I would likely use aggregation in order to void the street address and exact coordinates entirely. I would likely just leave it as the neighborhood. I would also suppress the number of requests that is shown if it shows to be too small. I would likely not disclose the number of requests if they are less than ~5.
 
 ## (5.2)
-# Some people are unable to access technology, do not speak the language that 311 may host with, and/or are just unaware of the 311 system. This would lead to many requests not being put in and the only requests that are being noticed are biased toward English Speakers who are able to access technology easier. A city manager would likely see plenty of requests for one area in a primarily English Speaking town and would first go there but would not check other areas that are not the majority. One way to reduce the bias is to add more accessibility / translation options with 311. 
+
+Some people are unable to access technology, do not speak the language that 311 may host with, and/or are just unaware of the 311 system. This would lead to many requests not being put in and the only requests that are being noticed are biased toward English Speakers who are able to access technology easier. A city manager would likely see plenty of requests for one area in a primarily English Speaking town and would first go there but would not check other areas that are not the majority. One way to reduce the bias is to add more accessibility / translation options with 311.
 
 ## (5.3)
-# I believe the scraping that I did in Part II was appropriate. The Wikipedia table is public and contains no personal information. Following its reference link, it led me to the "Chicago Metropolitan Agency for Planning". The website is a government website with the data public as well. I did nothing that would be out of the ordinary for this information to be used nor would it violate any citizen's privacy. For the CSS portion, "Books to Scrape" is a site built for scraping practice so that also has no ethical concerns either. A situation that would require further review would be with a dataset that holds more private information like addresses, names, or other personal identifiers. This would likely be anything related to court, eviction, and other records. 
 
+I believe the scraping that I did in Part II was appropriate. The Wikipedia table is public and contains no personal information. Following its reference link, it led me to the "Chicago Metropolitan Agency for Planning". The website is a government website with the data public as well. I did nothing that would be out of the ordinary for this information to be used nor would it violate any citizen's privacy. For the CSS portion, "Books to Scrape" is a site built for scraping practice so that also has no ethical concerns either. A situation that would require further review would be with a dataset that holds more private information like addresses, names, or other personal identifiers. This would likely be anything related to court, eviction, and other records.
 
+# AI USAGE
 
-### AI USAGE
-
-# Used it a few times primarily for syntax/grammar errors. I could not figure out what was wrong and realized it was someting as simple as "estimmate" and I made sure my wording made sense for explanations considering at the moment of doing the assignment I had put a concerning amount of typos that I would not have caught. I also checked my scatterplot code to make sure it was right because the plot itself did not look quite right and I was concerned.
+Used it a few times primarily for syntax/grammar errors. I could not figure out what was wrong and realized it was something as simple as "estimmate" and I made sure my wording made sense for explanations considering at the moment of doing the assignment I had put a concerning amount of typos that I would not have caught. I also checked my scatterplot code to make sure it was right because the plot itself did not look quite right and I was concerned. Lastly, I used it to add the {r} since I forgot to add those and was trying to figure out why the code isn't outputting on the rmd document.
