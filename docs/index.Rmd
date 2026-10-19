@@ -166,3 +166,53 @@ top_ten
 
 # PART IV
 
+## (4.1)
+### Gross Rent as a Percentage of Household Income, “Total”: B25070_001E
+### • Gross Rent as a Percentage of Household Income, "50.0 percent or more": ________ B25070_010E
+### • Median Household Income: ________ B19013_001E
+
+## (4.2)
+
+ohio <- get_acs(
+  geography = "county",
+  variables = c(
+    Total = "B25070_001E",
+    Rent_50 = "B25070_010E",
+    median_income = "B19013_001E"
+  ),
+  state = "OH",
+  year = 2024,
+  survey = "acs5"
+)
+
+## (4.3)
+
+ohio_wider <- ohio %>%
+  select(GEOID, NAME, variable, estimate) %>%
+  pivot_wider(names_from = variable, values_from = estimate)
+
+ohio_wider <- ohio_wider %>%
+  mutate(severe_burden_rate = B25070_010 / B25070_001 * 100) %>% 
+  arrange(desc(severe_burden_rate))
+  
+## (4.BONUS)
+
+ohio_wider <- ohio_wider %>%
+  separate(NAME, into = c("county", "state"), ", ")
+
+## (4.4)
+
+ohio_wider %>%
+  summarize(
+    mean_rate = mean(severe_burden_rate),
+    median_rate = median(severe_burden_rate)
+  )
+
+top5 <- ohio_wider %>%
+  arrange(desc(severe_burden_rate)) %>%
+  head(5)
+  
+bottom5 <- ohio_wider %>%
+  arrange(severe_burden_rate) %>%
+  head(5)
+
